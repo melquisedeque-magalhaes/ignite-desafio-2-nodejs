@@ -10,19 +10,69 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers
+
+  const usernameAlreadyExists = users.find(user => {
+    return user.username === username
+  })
+
+  if(!usernameAlreadyExists)
+    return response.status(404).json({ error: 'User not found !' })
+
+  request.user = usernameAlreadyExists
+
+  next()
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request
+
+  const countTodoUser = user.todos.length + 1
+
+  if(!user.pro && countTodoUser > 10)
+    return response.status(403).json({ error: 'User not Authorization !' }) 
+
+  next()
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers
+  const { id } = request.params
+
+  const usernameAlreadyExists = users.find(user => ( user.username === username ))
+
+  if(!usernameAlreadyExists)
+    return response.status(404).json({ error: 'User not found !' })
+
+  const validId = validate(id)
+
+  if(!validId)
+    return response.status(400).json({ error: 'Id is not valid!' })
+
+  const idAlreadyExists = usernameAlreadyExists.todos.find(user => ( user.id ===  id ))
+
+  if(!idAlreadyExists)
+    return response.status(404).json({ error: 'Id not found!' })
+
+  request.todo = idAlreadyExists
+
+  request.user = usernameAlreadyExists
+
+  next()
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params
+
+  const idAlreadyExists = users.find(user => ( user.id === id ))
+
+  if(!idAlreadyExists)
+    return response.status(404).json({ error: 'User not found !' })
+
+  request.user = idAlreadyExists
+
+  next()
+
 }
 
 app.post('/users', (request, response) => {
